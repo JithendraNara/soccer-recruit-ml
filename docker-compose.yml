@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./mlruns:/app/mlruns
+    environment:
+      - DATABASE_URL=sqlite:///./soccer_recruit.db
+      - MLFLOW_TRACKING_URI=./mlruns
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./dashboards:/app/dashboards
+    environment:
+      - API_BASE_URL=http://api:8000/api/v1
+    command: streamlit run dashboards/app.py --server.port 8501
+    depends_on:
+      - api

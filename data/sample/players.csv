@@ -1,0 +1,21 @@
+name,age,nationality,position,height,weight,appearances,minutes_played,goals,assists,pass_accuracy,shots_per_game,tackles,interceptions,saves,clean_sheets,value,wage,league,team,season
+Lionel Messi,36,Argentina,FW,170,72,490,39650,812,322,85.5,4.2,125,89,0,0,50000000,500000,MLS,Inter Miami,2024
+Erling Haaland,23,Norway,FW,194,88,180,14850,178,45,78.2,5.8,45,22,0,0,180000000,375000,Premier League,Manchester City,2024
+Kylian Mbappe,25,France,FW,178,75,290,24350,256,108,82.1,4.5,68,42,0,0,180000000,350000,La Liga,Real Madrid,2024
+Kevin De Bruyne,32,Belgium,CM,181,70,310,25850,102,168,88.9,3.2,185,145,0,0,70000000,400000,Premier League,Manchester City,2024
+Mohamed Salah,31,Egypt,FW,175,71,350,30200,208,98,84.5,3.8,95,68,0,0,80000000,350000,Premier League,Liverpool,2024
+Robert Lewandowski,35,Poland,FW,185,81,480,40200,495,132,80.2,4.9,85,55,0,0,45000000,280000,La Liga,Barcelona,2024
+Harry Kane,30,England,FW,188,86,380,32150,285,74,79.8,4.1,95,62,0,0,90000000,320000,Bundesliga,Bayern Munich,2024
+Vinicius Jr,23,Brazil,FW,176,73,180,14200,78,65,82.5,3.5,125,85,0,0,150000000,200000,La Liga,Real Madrid,2024
+Jude Bellingham,20,England,CM,186,75,120,9800,42,38,84.2,2.8,145,95,0,0,130000000,180000,La Liga,Real Madrid,2024
+Virgil van Dijk,32,Netherlands,CB,193,92,280,24650,25,15,87.5,0.8,520,380,0,125,65000000,250000,Premier League,Liverpool,2024
+Alisson Becker,31,Brazil,GK,191,91,240,21150,8,12,82.5,0.0,0,0,85,95,45000000,180000,Premier League,Liverpool,2024
+Pedri,21,Spain,CM,174,68,110,8900,18,22,87.2,2.2,165,120,0,0,90000000,120000,La Liga,Barcelona,2024
+Bukayo Saka,22,England,FW,184,73,150,12200,55,45,83.8,3.4,185,125,0,0,120000000,150000,Premier League,Arsenal,2024
+Martin Odegaard,25,Norway,CM,184,79,180,14850,42,38,86.5,2.8,155,110,0,0,85000000,180000,Premier League,Arsenal,2024
+Antonio Rudiger,31,Germany,CB,190,85,260,22850,18,12,86.2,0.9,485,320,0,85,40000000,200000,La Liga,Real Madrid,2024
+Theo Hernandez,26,France,LB,184,75,190,16200,35,45,81.5,2.2,295,220,0,45,65000000,140000,Serie A,AC Milan,2024
+Victor Osimhen,25,Nigeria,FW,183,78,140,11500,78,25,76.5,4.8,35,18,0,0,110000000,160000,Serie A,Napoli,2024
+Victor Sanchez,26,Spain,CM,175,70,200,16500,55,68,87.8,2.5,220,165,0,0,70000000,150000,Premier League,Tottenham,2024
+Marcus Rashford,26,England,FW,185,70,260,20800,98,65,81.2,3.8,115,75,0,0,75000000,200000,Premier League,Manchester United,2024
+Trent Alexander-Arnold,25,England,RB,180,69,200,17200,45,85,82.5,2.2,280,195,0,55,80000000,180000,Premier League,Liverpool,2024
