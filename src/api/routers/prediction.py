@@ -84,8 +84,9 @@ def train_prediction_model(db=Depends(get_db)):
     player_ids = [p.id for p in players]
     features_dict = repo.get_features(player_ids)
 
-    # Prepare data
-    feature_keys = list(features_dict[player_ids[0]].keys())
+    # Prepare data - exclude 'value' since it's the target
+    all_feature_keys = list(features_dict[player_ids[0]].keys())
+    feature_keys = [k for k in all_feature_keys if k != "value"]
     X = np.array([[features_dict[pid][key] for key in feature_keys] for pid in player_ids])
     y = np.array([players[i].value or 0 for i in range(len(players))])
 

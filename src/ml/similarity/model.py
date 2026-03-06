@@ -15,12 +15,13 @@ class SimilarityModel:
         self.features: Optional[np.ndarray] = None
         self.is_fitted = False
 
-    def fit(self, player_ids: List[int], features: np.ndarray) -> "SimilarityModel":
+    def fit(self, player_ids: List[int], features) -> "SimilarityModel":
         """Fit the similarity model with player features."""
         from sklearn.neighbors import NearestNeighbors
 
         self.player_ids = player_ids
-        self.features = features
+        # Convert to numpy array if not already
+        self.features = np.array(features)
 
         # Use KNN with cosine similarity
         self.model = NearestNeighbors(
