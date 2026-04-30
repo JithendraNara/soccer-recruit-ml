@@ -25,8 +25,15 @@ class PredictionTrainer:
         params: Dict[str, Any] = None,
         test_size: float = 0.2,
         random_state: int = 42,
+        fit_quantiles: bool = True,
     ) -> Tuple[PredictionModel, Dict[str, float]]:
-        """Train the prediction model with MLflow tracking and train/test split."""
+        """Train the prediction model with MLflow tracking and train/test split.
+
+        Args:
+            fit_quantiles: If True, also fits 10th/90th percentile models for
+                          prediction intervals (via quantile regression).
+        """
+        mlflow.set_experiment("soccer-value-prediction")
         mlflow.set_experiment("soccer-value-prediction")
 
         # Stratified split if enough samples and classification-like target
@@ -58,7 +65,7 @@ class PredictionTrainer:
             X_test_scaled = self.transformation.scale_features(X_test, method="standard")
 
             # Fit model on training data
-            model = self.model.fit(X_train_scaled, y_train, feature_names)
+            model = self.model.fit(X_train_scaled, y_train, feature_names, fit_quantiles=fit_quantiles)
 
             # Calculate training metrics (on train set)
             train_preds = model.predict(X_train_scaled)

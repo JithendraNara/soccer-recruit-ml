@@ -25,22 +25,36 @@ class SimilarityModelRegistry:
         self._feature_keys: List[str] = []
 
     def _build_features(self, repo: PlayerRepository, player_ids: List[int]) -> tuple:
-        """Build feature matrix by union-ing keys across ALL players."""
+        """Build feature matrix by union-ing keys across ALL players and adding position encoding."""
         features_dict = repo.get_features(player_ids)
+        players = repo.get_all(limit=10000)
+        player_map = {p.id: p for p in players}
 
-        # FIX: Collect keys from every player, take the union
+        # Collect keys from every player, take the union
         all_keys = set()
         for pid in player_ids:
             if pid in features_dict:
                 all_keys |= set(features_dict[pid].keys())
 
-        # Sort for deterministic ordering
         feature_keys = sorted(all_keys)
-        features = [
-            [features_dict[pid].get(key, 0) for key in feature_keys]
-            for pid in player_ids
-        ]
-        return features, feature_keys
+
+        # Build matrix with position one-hot encoding appended
+        ft = FeatureTransformation()
+        features = []
+        for pid in player_ids:
+            row = [features_dict[pid].get(key, 0) for key in feature_keys]
+            player = player_map.get(pid)
+            if player and player.position:
+                pos_enc = ft.create_position_encoding(player.position).tolist()
+            else:
+                pos_enc = [0, 0, 0, 0]
+            features.append(row + pos_enc)
+
+        # Append position key names
+        pos_key_names = ["pos_GK", "pos_DEF", "pos_MID", "pos_FWD"]
+        all_feature_keys = feature_keys + pos_key_names
+
+        return features, all_feature_keys
 
     def train(self, repo: PlayerRepository, player_ids: List[int], top_k: int = 5) -> dict:
         """Train and persist the similarity model."""
