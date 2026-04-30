@@ -36,7 +36,8 @@ class SimilarityModelRegistry:
             if pid in features_dict:
                 all_keys |= set(features_dict[pid].keys())
 
-        feature_keys = sorted(all_keys)
+        # Exclude 'position' from the numeric matrix — it's decoded as one-hot below
+        feature_keys = sorted(key for key in all_keys if key != "position")
 
         # Build matrix with position one-hot encoding appended
         ft = FeatureTransformation()

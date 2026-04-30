@@ -158,7 +158,7 @@ def train_prediction_model(db: Session = Depends(get_db)):
     if not all_keys:
         raise HTTPException(status_code=500, detail="No features found")
 
-    feature_keys = sorted(k for k in all_keys if k != "value")
+    feature_keys = sorted(k for k in all_keys if k not in ("value", "position"))
 
     X = np.array([
         [features_dict[pid].get(key, 0) for key in feature_keys]

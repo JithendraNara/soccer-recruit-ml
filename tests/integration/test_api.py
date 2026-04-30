@@ -129,7 +129,7 @@ def setup_and_teardown():
         for pid in player_ids:
             if pid in features_dict:
                 all_keys |= set(features_dict[pid].keys())
-        feature_keys = sorted(k for k in all_keys if k != "value")
+        feature_keys = sorted(k for k in all_keys if k not in ("value", "position"))
         X = np.array([[features_dict[pid].get(key, 0) for key in feature_keys] for pid in player_ids])
         y = np.array([float(players[i].value or 0) for i in range(len(players))])
         mask = y > 0

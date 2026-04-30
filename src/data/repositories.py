@@ -72,7 +72,7 @@ class PlayerRepository:
             "age", "height", "weight", "appearances", "minutes_played",
             "goals", "assists", "pass_accuracy", "shots_per_game",
             "tackles", "interceptions", "saves", "clean_sheets", "wage",
-        }
+        ]
 
         features = {}
         for player in players:

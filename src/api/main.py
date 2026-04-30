@@ -1,4 +1,5 @@
 """FastAPI application."""
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.utils.config import settings
@@ -7,14 +8,53 @@ from src.data.database import init_db
 from src.api.routers import players, similarity, prediction
 from src.api.schemas.models import HealthResponse
 
-# Create FastAPI app
+
+def _load_models():
+    """Load persisted models from disk on startup for faster first request."""
+    import os
+    from src.api.routers import similarity as sim_router, prediction as pred_router
+
+    models_dir = "./models"
+    if not os.path.exists(models_dir):
+        return
+
+    try:
+        sim_file = os.path.join(models_dir, "similarity_model.joblib")
+        if os.path.exists(sim_file):
+            import joblib
+            sim_router._model_registry._model = joblib.load(sim_file)
+            logger.info("Loaded similarity model from disk")
+    except Exception as e:
+        logger.warning(f"Could not load similarity model: {e}")
+
+    try:
+        pred_file = os.path.join(models_dir, "prediction_model.joblib")
+        if os.path.exists(pred_file):
+            import joblib
+            pred_router._prediction_model = joblib.load(pred_file)
+            logger.info("Loaded prediction model from disk")
+    except Exception as e:
+        logger.warning(f"Could not load prediction model: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager — startup and shutdown events."""
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    init_db()
+    logger.info("Database initialized")
+    _load_models()
+    yield
+    logger.info("Shutting down")
+
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="Soccer Player Similarity & Recruitment Modeling Platform"
+    description="Soccer Player Similarity & Recruitment Modeling Platform",
+    lifespan=lifespan,
 )
 
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -23,37 +63,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(players.router, prefix=settings.api_prefix)
 app.include_router(similarity.router, prefix=settings.api_prefix)
 app.include_router(prediction.router, prefix=settings.api_prefix)
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize on startup."""
-    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-    init_db()
-    logger.info("Database initialized")
-
-
 @app.get("/", tags=["root"])
 def root():
-    """Root endpoint."""
     return {
         "name": settings.app_name,
         "version": settings.app_version,
-        "docs": "/docs"
+        "docs": "/docs",
     }
 
 
 @app.get("/health", response_model=HealthResponse, tags=["health"])
 def health_check():
-    """Health check endpoint."""
     return HealthResponse(
         status="healthy",
         version=settings.app_version,
-        database="sqlite"
+        database="sqlite",
     )
 
 
