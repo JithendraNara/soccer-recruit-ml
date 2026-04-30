@@ -37,7 +37,7 @@ async def startup_event():
     logger.info("Database initialized")
 
 
-@app.get("", tags=["root"])
+@app.get("/", tags=["root"])
 def root():
     """Root endpoint."""
     return {

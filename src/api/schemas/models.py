@@ -109,9 +109,13 @@ class PredictionResponse(BaseModel):
 
 
 class PredictionByIdRequest(BaseModel):
-    """Schema for prediction by player ID with optional overrides."""
+    """Schema for prediction by player ID with optional overrides.
 
-    player_id: int
+    player_id is optional in the body — when the client calls
+    POST /predict/value/{player_id} the path param supplies it.
+    """
+
+    player_id: Optional[int] = None
     overrides: Optional[PredictionRequest] = None
 
 

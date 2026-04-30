@@ -59,7 +59,7 @@ class SimilarityModel:
         # Scale the query vector with the SAME scaler fitted during training
         player_vector_scaled = self._scaler.transform(player_vector)
 
-        k = top_k or self.n_neighbors
+        k = min(top_k or self.n_neighbors, len(self.player_ids) - 1)
         distances, indices = self.model.kneighbors(player_vector_scaled, n_neighbors=k + 1)
 
         results = []
