@@ -62,14 +62,17 @@ class PlayerRepository:
         return players
 
     def get_features(self, player_ids: List[int]) -> dict:
-        """Get feature matrix for given player IDs."""
+        """Get feature + metadata dict for given player IDs.
+
+        Includes position for position encoding in similarity pipelines.
+        """
         players = self.db.query(Player).filter(Player.id.in_(player_ids)).all()
 
         feature_keys = [
             "age", "height", "weight", "appearances", "minutes_played",
             "goals", "assists", "pass_accuracy", "shots_per_game",
-            "tackles", "interceptions", "saves", "clean_sheets", "value", "wage"
-        ]
+            "tackles", "interceptions", "saves", "clean_sheets", "wage",
+        }
 
         features = {}
         for player in players:
@@ -77,6 +80,8 @@ class PlayerRepository:
                 key: getattr(player, key, None) or 0
                 for key in feature_keys
             }
+            # Include position for similarity position encoding
+            features[player.id]["position"] = player.position
 
         return features
 
