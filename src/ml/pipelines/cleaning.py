@@ -19,19 +19,21 @@ class DataCleaning:
         text_columns = df.select_dtypes(include=["object"]).columns
         df[text_columns] = df[text_columns].fillna("Unknown")
 
-        # Remove duplicates
-        initial_len = len(df)
-        df = df.drop_duplicates(subset=["name", "team", "season"])
-        logger.info(f"Removed {initial_len - len(df)} duplicate rows")
+        # Normalize text fields before dedup so whitespace variants collapse
+        df["name"] = df["name"].str.strip()
+        df["position"] = df["position"].str.strip().str.upper()
+
+        # Remove duplicates — only use columns that actually exist
+        dedup_cols = [c for c in ["name", "team", "season"] if c in df.columns]
+        if dedup_cols:
+            initial_len = len(df)
+            df = df.drop_duplicates(subset=dedup_cols)
+            logger.info(f"Removed {initial_len - len(df)} duplicate rows")
 
         # Filter invalid records
         df = df[df["age"] > 0]
         df = df[df["age"] < 50]
         df = df[df["appearances"] >= 0]
-
-        # Clean text fields
-        df["name"] = df["name"].str.strip()
-        df["position"] = df["position"].str.strip().str.upper()
 
         logger.info(f"Cleaned data: {len(df)} rows remaining")
         return df

@@ -38,13 +38,9 @@ class SimilarityTrainer:
             player_ids_arr = np.array(player_ids)
             features_arr = np.array(features)
 
-            # Scale features
-            features_scaled = self.transformation.scale_features(
-                features_arr, method="standard"
-            )
-
-            # Fit model
-            model = self.model.fit(player_ids_arr.tolist(), features_scaled)
+            # SimilarityModel.fit() applies MinMax scaling internally,
+            # so pass raw features here (don't pre-scale)
+            model = self.model.fit(player_ids_arr.tolist(), features_arr.tolist())
 
             # Log metrics
             mlflow.log_metric("n_players_trained", len(player_ids))
