@@ -1,7 +1,8 @@
 """Training pipeline for prediction model."""
 import mlflow
 import numpy as np
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
+from sklearn.model_selection import train_test_split as sklearn_split
 from src.ml.prediction.model import PredictionModel
 from src.ml.pipelines.transformation import FeatureTransformation
 from src.utils.config import settings
@@ -14,53 +15,82 @@ class PredictionTrainer:
     def __init__(self, model_type: str = "gradient_boosting"):
         self.transformation = FeatureTransformation()
         self.model = PredictionModel(model_type=model_type)
+        self._test_metrics: Optional[Dict[str, float]] = None
 
     def train(
         self,
         X: np.ndarray,
         y: np.ndarray,
         feature_names: list,
-        params: Dict[str, Any] = None
+        params: Dict[str, Any] = None,
+        test_size: float = 0.2,
+        random_state: int = 42,
     ) -> Tuple[PredictionModel, Dict[str, float]]:
-        """Train the prediction model with MLflow tracking."""
+        """Train the prediction model with MLflow tracking and train/test split."""
         mlflow.set_experiment("soccer-value-prediction")
+
+        # Stratified split if enough samples and classification-like target
+        if len(y) >= 20:
+            X_train, X_test, y_train, y_test = sklearn_split(
+                X, y, test_size=test_size, random_state=random_state
+            )
+        else:
+            # Fallback for small datasets
+            split_idx = int(len(y) * (1 - test_size))
+            X_train, X_test = X[:split_idx], X[split_idx:]
+            y_train, y_test = y[:split_idx], y[split_idx:]
+
+        params = params or {}
 
         with mlflow.start_run(run_name="value-prediction-training"):
             # Log parameters
-            params = params or {}
             mlflow.log_params({
                 "model_type": params.get("model_type", "gradient_boosting"),
                 "n_samples": len(X),
                 "n_features": X.shape[1],
+                "test_size": test_size,
+                "n_train": len(X_train),
+                "n_test": len(X_test),
             })
 
-            # Scale features
-            X_scaled = self.transformation.scale_features(X, method="standard")
+            # Scale features using only training data
+            X_train_scaled = self.transformation.scale_features(X_train, method="standard")
+            X_test_scaled = self.transformation.scale_features(X_test, method="standard")
 
-            # Fit model
-            model = self.model.fit(X_scaled, y, feature_names)
+            # Fit model on training data
+            model = self.model.fit(X_train_scaled, y_train, feature_names)
 
-            # Calculate training metrics
-            predictions = model.predict(X_scaled)
-            metrics = self._calculate_metrics(y, predictions)
+            # Calculate training metrics (on train set)
+            train_preds = model.predict(X_train_scaled)
+            train_metrics = self._calculate_metrics(y_train, train_preds)
 
-            # Log metrics
             mlflow.log_metrics({
-                "mae": metrics["mae"],
-                "rmse": metrics["rmse"],
-                "r2": metrics["r2"],
-                "mape": metrics["mape"],
+                f"train_{k}": v for k, v in train_metrics.items()
             })
 
-            logger.info(f"Training metrics: {metrics}")
+            # Calculate test metrics (on held-out set — this is the real signal)
+            test_preds = model.predict(X_test_scaled)
+            test_metrics = self._calculate_metrics(y_test, test_preds)
 
-        return model, metrics
+            self._test_metrics = test_metrics
+            mlflow.log_metrics({
+                f"test_{k}": v for k, v in test_metrics.items()
+            })
+
+            logger.info(f"Training metrics: {train_metrics}")
+            logger.info(f"Test metrics: {test_metrics}")
+
+        return model, test_metrics
 
     def _calculate_metrics(
         self, y_true: np.ndarray, y_pred: np.ndarray
     ) -> Dict[str, float]:
         """Calculate regression metrics."""
-        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+        from sklearn.metrics import (
+            mean_absolute_error,
+            mean_squared_error,
+            r2_score,
+        )
 
         mae = mean_absolute_error(y_true, y_pred)
         rmse = np.sqrt(mean_squared_error(y_true, y_pred))
@@ -84,7 +114,7 @@ class PredictionTrainer:
         self,
         model: PredictionModel,
         X_test: np.ndarray,
-        y_test: np.ndarray
+        y_test: np.ndarray,
     ) -> Dict[str, float]:
         """Evaluate model on test data."""
         X_scaled = self.transformation.scale_features(X_test, method="standard")
