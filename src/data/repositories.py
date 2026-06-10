@@ -71,8 +71,11 @@ class PlayerRepository:
         feature_keys = [
             "age", "height", "weight", "appearances", "minutes_played",
             "goals", "assists", "pass_accuracy", "shots_per_game",
-            "tackles", "interceptions", "saves", "clean_sheets", "wage",
+            "tackles", "interceptions", "saves", "clean_sheets",
         ]
+        # NOTE: 'wage' intentionally excluded — it's highly correlated with 'value'
+        # (typically 0.05-0.15% of market value) and would cause target leakage.
+        # A scout predicting value has access to performance stats, not contract details.
 
         features = {}
         for player in players:

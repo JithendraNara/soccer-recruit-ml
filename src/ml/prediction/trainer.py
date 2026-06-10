@@ -60,9 +60,12 @@ class PredictionTrainer:
                 "n_test": len(X_test),
             })
 
-            # Scale features using only training data
-            X_train_scaled = self.transformation.scale_features(X_train, method="standard")
-            X_test_scaled = self.transformation.scale_features(X_test, method="standard")
+            # Scale features using ONLY training data, then apply same scaler to test
+            # (this was a bug — original code re-fit scaler on test data, causing data leak)
+            from sklearn.preprocessing import StandardScaler
+            scaler = StandardScaler()
+            X_train_scaled = scaler.fit_transform(X_train)
+            X_test_scaled = scaler.transform(X_test)
 
             # Fit model on training data
             model = self.model.fit(X_train_scaled, y_train, feature_names, fit_quantiles=fit_quantiles)

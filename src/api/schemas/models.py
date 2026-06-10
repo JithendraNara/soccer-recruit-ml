@@ -75,7 +75,12 @@ class SimilarPlayersResponse(BaseModel):
 
 
 class PredictionRequest(BaseModel):
-    """Schema for prediction request with field validation."""
+    """Schema for prediction request with field validation.
+
+    Note: 'wage' was removed — it's a target leakage feature
+    (highly correlated with market value), and a scout typically
+    doesn't have access to private contract details.
+    """
 
     age: float = Field(..., ge=15, le=50)
     height: float = Field(..., ge=140, le=220)
@@ -90,7 +95,6 @@ class PredictionRequest(BaseModel):
     interceptions: float = Field(..., ge=0)
     saves: float = Field(..., ge=0)
     clean_sheets: float = Field(..., ge=0)
-    wage: float = Field(..., ge=0)
 
     @field_validator("minutes_played")
     @classmethod

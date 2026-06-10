@@ -44,7 +44,11 @@ def get_prediction_model() -> PredictionModel:
 
 
 def _build_feature_vector(req: PredictionRequest) -> np.ndarray:
-    """Build a feature vector from a PredictionRequest."""
+    """Build a feature vector from a PredictionRequest.
+
+    Excludes 'wage' — it's not in the training features and including it
+    would cause a feature mismatch error.
+    """
     return np.array([
         req.age,
         req.height,
@@ -59,7 +63,6 @@ def _build_feature_vector(req: PredictionRequest) -> np.ndarray:
         req.interceptions,
         req.saves,
         req.clean_sheets,
-        req.wage,
     ])
 
 
@@ -116,7 +119,6 @@ def predict_player_value_by_id(
             interceptions=float(player.interceptions or 0),
             saves=float(player.saves or 0),
             clean_sheets=float(player.clean_sheets or 0),
-            wage=float(player.wage or 0),
         )
 
     features = _build_feature_vector(req)
